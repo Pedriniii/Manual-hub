@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { UserPermissions } from '../types';
 
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   role: string;
+  permissions?: UserPermissions;
 }
 
 interface AuthContextType {

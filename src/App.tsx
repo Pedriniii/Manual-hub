@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { ManualNew } from './pages/ManualNew';
 import { ManualDetail } from './pages/ManualDetail';
 import { AccessLogs } from './pages/AccessLogs';
+import { Users } from './pages/Users';
 import { PublicManual } from './pages/PublicManual';
 
 const queryClient = new QueryClient({
@@ -25,7 +26,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
         Carregando sessão...
       </div>
     );
@@ -77,6 +78,14 @@ export const AppContent: React.FC = () => {
         element={
           <ProtectedRoute>
             <AccessLogs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <Users />
           </ProtectedRoute>
         }
       />

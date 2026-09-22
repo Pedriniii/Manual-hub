@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { fetchDashboardStats, fetchManuals } from '../lib/api';
+import { fetchDashboardStats, fetchManuals, deleteManual } from '../lib/api';
 import { Layout } from '../components/layout/Layout';
 import { Card, CardContent } from '../components/common/Card';
 import { Button } from '../components/common/Button';
@@ -9,6 +9,7 @@ import { Badge } from '../components/common/Badge';
 import { SearchInput } from '../components/common/SearchInput';
 import { GenerateLinkModal } from '../components/links/GenerateLinkModal';
 import { formatDateShort } from '../lib/utils';
+import { useAuth } from '../context/AuthContext';
 import { 
   BookOpen, 
   Link2, 
@@ -20,13 +21,20 @@ import {
   FolderGit2, 
   ChevronRight,
   ExternalLink,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLinkModal, setSelectedLinkModal] = useState<{ id: string; title: string } | null>(null);
+
+  // Permissions checks
+  const canEdit = user?.permissions?.can_edit !== false;
+  const canDelete = user?.permissions?.can_delete !== false;
 
   // Queries
   const { data: stats, isLoading: isStatsLoading } = useQuery({
@@ -39,6 +47,18 @@ export const Dashboard: React.FC = () => {
     queryFn: () => fetchManuals(searchQuery),
   });
 
+  const handleDelete = async (manualId: string, title: string) => {
+    if (window.confirm(`Tem certeza que deseja excluir o manual "${title}"? Esta ação removerá também todo o histórico de revisões e links.`)) {
+      try {
+        await deleteManual(manualId);
+        refetch();
+        queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      } catch (err: any) {
+        alert(`Erro ao excluir manual: ${err.message}`);
+      }
+    }
+  };
+
   return (
     <Layout>
       <div className="space-y-8">
@@ -50,14 +70,16 @@ export const Dashboard: React.FC = () => {
               Gerencie, versione e compartilhe manuais de construtoras com links diretos seguros.
             </p>
           </div>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate('/manuals/new')}
-            icon={<Plus className="w-4 h-4" />}
-          >
-            Novo Manual
-          </Button>
+          {canEdit && (
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => navigate('/manuals/new')}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              Novo Manual
+            </Button>
+          )}
         </div>
 
         {/* Stat Cards */}
@@ -245,6 +267,19 @@ export const Dashboard: React.FC = () => {
                             >
                               Detalhes
                             </Button>
+
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(manual.id, manual.title)}
+                                className="text-rose-600 hover:bg-rose-50"
+                                icon={<Trash2 className="w-3.5 h-3.5" />}
+                                title="Excluir Manual"
+                              >
+                                Excluir
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>

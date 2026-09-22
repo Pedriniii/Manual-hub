@@ -33,5 +33,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  if (req.method === 'DELETE') {
+    try {
+      // 1. Delete associated logs, links, versions
+      await query(`DELETE FROM access_logs WHERE link_id IN (SELECT id FROM public_links WHERE manual_id = $1)`, [id]);
+      await query(`DELETE FROM public_links WHERE manual_id = $1`, [id]);
+      await query(`DELETE FROM manual_versions WHERE manual_id = $1`, [id]);
+      await query(`DELETE FROM manuals WHERE id = $1`, [id]);
+
+      return res.status(200).json({ success: true, message: 'Manual excluído com sucesso.' });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
   return res.status(405).json({ error: 'Método não permitido' });
 }

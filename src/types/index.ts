@@ -1,3 +1,21 @@
+export interface UserPermissions {
+  can_view: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+  can_manage_users: boolean;
+}
+
+export interface UserRecord {
+  id: string;
+  name: string;
+  email: string;
+  role: 'superadmin' | 'admin' | 'editor' | 'viewer';
+  active: boolean;
+  permissions: UserPermissions;
+  created_at: string;
+  updated_at?: string;
+}
+
 export interface Manual {
   id: string;
   title: string;
@@ -39,7 +57,7 @@ export interface PublicLink {
 export interface AccessLog {
   id: string;
   link_id: string;
-  event_type: 'view' | 'download';
+  event_type: 'view' | 'download' | 'preview' | 'link_created' | 'link_disabled';
   ip: string | null;
   user_agent: string | null;
   created_at: string;
@@ -66,13 +84,13 @@ export interface CreateManualDTO {
   project: string;
   revision: string;
   description?: string;
-  file: File;
+  file?: File;
 }
 
 export interface CreateVersionDTO {
   manual_id: string;
   revision: string;
-  file: File;
+  file?: File;
 }
 
 export interface CreatePublicLinkDTO {
@@ -81,4 +99,21 @@ export interface CreatePublicLinkDTO {
   expires_at?: string;
   password?: string;
   active?: boolean;
+}
+
+export interface CreateUserDTO {
+  name: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'editor' | 'viewer';
+  permissions: UserPermissions;
+}
+
+export interface UpdateUserDTO {
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: 'admin' | 'editor' | 'viewer';
+  active?: boolean;
+  permissions?: UserPermissions;
 }

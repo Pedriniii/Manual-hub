@@ -6,13 +6,85 @@ import {
   DashboardStats,
   CreateManualDTO,
   CreateVersionDTO,
-  CreatePublicLinkDTO 
+  CreatePublicLinkDTO,
+  UserRecord,
+  CreateUserDTO,
+  UpdateUserDTO
 } from '../types';
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('manualhub_auth_token');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
+
+// ==========================================
+// USER MANAGEMENT API
+// ==========================================
+
+export async function fetchUsers(): Promise<UserRecord[]> {
+  const res = await fetch('/api/users', {
+    headers: { ...getAuthHeader() },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Erro ao carregar lista de usuários.');
+  }
+
+  return res.json();
+}
+
+export async function createUser(dto: CreateUserDTO): Promise<UserRecord> {
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(dto),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Erro ao cadastrar usuário.');
+  }
+
+  return res.json();
+}
+
+export async function updateUser(id: string, dto: UpdateUserDTO): Promise<UserRecord> {
+  const res = await fetch(`/api/users/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(dto),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Erro ao atualizar usuário.');
+  }
+
+  return res.json();
+}
+
+export async function deleteUser(id: string): Promise<void> {
+  const res = await fetch(`/api/users/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeader() },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Erro ao excluir usuário.');
+  }
+}
+
+// ==========================================
+// MANUALS & DASHBOARD API
+// ==========================================
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const res = await fetch('/api/stats', {
@@ -55,6 +127,18 @@ export async function fetchManualById(id: string): Promise<{ manual: Manual; ver
   }
 
   return res.json();
+}
+
+export async function deleteManual(id: string): Promise<void> {
+  const res = await fetch(`/api/manuals/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeader() },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Erro ao excluir manual.');
+  }
 }
 
 export async function createManual(dto: CreateManualDTO, userId?: string): Promise<Manual> {

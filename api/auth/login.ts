@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Search user by email / login ID
     const users = await query<any>(
-      `SELECT id, name, email, password_hash, role, active FROM users WHERE email = $1 OR email = $2 LIMIT 1`,
+      `SELECT id, name, email, password_hash, role, active, permissions FROM users WHERE email = $1 OR email = $2 LIMIT 1`,
       [email.trim(), email.trim().toUpperCase()]
     );
 
@@ -42,12 +42,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const token = createSessionToken(user.id, user.email);
 
+    const defaultPerms = {
+      can_view: true,
+      can_edit: user.role !== 'viewer',
+      can_delete: user.role === 'admin' || user.role === 'superadmin',
+      can_manage_users: user.role === 'admin' || user.role === 'superadmin',
+    };
+
     return res.status(200).json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
+        permissions: user.permissions || defaultPerms,
       },
       token,
     });

@@ -8,7 +8,8 @@ import {
   Plus, 
   History, 
   LogOut, 
-  ShieldCheck
+  ShieldCheck,
+  Users as UsersIcon
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -17,6 +18,7 @@ export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
+  const canManageUsers = user?.role === 'superadmin' || user?.role === 'admin' || user?.permissions?.can_manage_users;
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
@@ -61,6 +63,20 @@ export const Navbar: React.FC = () => {
                 <History className="w-4 h-4" />
                 <span>Logs de Acesso</span>
               </Link>
+
+              {canManageUsers && (
+                <Link
+                  to="/users"
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive('/users') 
+                      ? 'bg-slate-100 text-blue-700' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+                >
+                  <UsersIcon className="w-4 h-4" />
+                  <span>Usuários</span>
+                </Link>
+              )}
             </nav>
           )}
         </div>
@@ -69,26 +85,30 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center space-x-3">
           {user ? (
             <>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => navigate('/manuals/new')}
-                icon={<Plus className="w-4 h-4" />}
-              >
-                Novo Manual
-              </Button>
+              {user.permissions?.can_edit !== false && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => navigate('/manuals/new')}
+                  icon={<Plus className="w-4 h-4" />}
+                >
+                  Novo Manual
+                </Button>
+              )}
 
               <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
 
               <div className="flex items-center space-x-2 pl-1">
-                <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-semibold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-semibold text-xs shrink-0">
                   {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
                 </div>
                 <div className="hidden lg:block text-left">
                   <p className="text-xs font-semibold text-slate-800 truncate max-w-[140px]">
                     {user.name || user.email}
                   </p>
-                  <p className="text-[10px] text-slate-400 truncate">Administrador</p>
+                  <p className="text-[10px] text-slate-400 truncate capitalize">
+                    {user.role === 'superadmin' ? 'Super Admin' : user.role}
+                  </p>
                 </div>
                 <Button
                   variant="ghost"

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchManualById, addManualVersion, togglePublicLinkStatus } from '../lib/api';
+import { fetchManualById, addManualVersion, togglePublicLinkStatus, deleteManual } from '../lib/api';
 import { Layout } from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/common/Card';
 import { Button } from '../components/common/Button';
@@ -27,7 +27,8 @@ import {
   Loader2,
   Lock,
   Globe,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 
 export const ManualDetail: React.FC = () => {
@@ -103,6 +104,21 @@ export const ManualDetail: React.FC = () => {
     setTimeout(() => setCopiedToken(null), 2000);
   };
 
+  const canEdit = user?.permissions?.can_edit !== false;
+  const canDelete = user?.permissions?.can_delete !== false;
+
+  const handleDeleteManual = async () => {
+    if (!id || !manual) return;
+    if (window.confirm(`Tem certeza que deseja excluir o manual "${manual.title}"? Todos os links e versões serão removidos permanentemente.`)) {
+      try {
+        await deleteManual(id);
+        navigate('/');
+      } catch (err: any) {
+        alert(`Erro ao excluir manual: ${err.message}`);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -144,14 +160,17 @@ export const ManualDetail: React.FC = () => {
           </Button>
 
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsVersionModalOpen(true)}
-              icon={<UploadCloud className="w-4 h-4 text-blue-600" />}
-            >
-              Nova Revisão
-            </Button>
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsVersionModalOpen(true)}
+                icon={<UploadCloud className="w-4 h-4 text-blue-600" />}
+              >
+                Nova Revisão
+              </Button>
+            )}
+
             <Button
               variant="primary"
               size="sm"
@@ -160,6 +179,18 @@ export const ManualDetail: React.FC = () => {
             >
               Gerar Link Público
             </Button>
+
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDeleteManual}
+                className="text-rose-600 hover:bg-rose-50"
+                icon={<Trash2 className="w-4 h-4" />}
+              >
+                Excluir
+              </Button>
+            )}
           </div>
         </div>
 
