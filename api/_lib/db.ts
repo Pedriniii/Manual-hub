@@ -1,10 +1,4 @@
-import { neon, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
-
-// Set WebSocket constructor for serverless environments if needed
-if (!neonConfig.webSocketConstructor) {
-  neonConfig.webSocketConstructor = ws;
-}
+import { neon } from '@neondatabase/serverless';
 
 /**
  * Sanitizes and validates DATABASE_URL from process.env
@@ -20,8 +14,8 @@ export function getSanitizedDatabaseUrl(): string {
 
   if (!cleanedUrl || cleanedUrl.includes('example')) {
     throw new Error(
-      'A variável de ambiente DATABASE_URL não está configurada na Vercel ou contém o valor de exemplo. ' +
-      'Por favor acesse Vercel -> Project Settings -> Environment Variables, adicione DATABASE_URL com a URL válida do Neon PostgreSQL e refaça o deploy.'
+      'A variável de ambiente DATABASE_URL não está configurada na Vercel. ' +
+      'Acesse Vercel -> Project Settings -> Environment Variables, adicione DATABASE_URL com a URL do Neon PostgreSQL e selecione (Production, Preview, Development).'
     );
   }
 
