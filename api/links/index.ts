@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { query } from '../_lib/db';
-import { handleCors } from '../_lib/cors';
+import { query } from '../_lib/db.js';
+import { handleCors } from '../_lib/cors.js';
 import crypto from 'crypto';
 
 function generateToken(length = 10): string {
