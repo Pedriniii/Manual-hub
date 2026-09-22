@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from '../_lib/db';
+import { handleCors } from '../_lib/cors';
 import crypto from 'crypto';
 
 function generateToken(length = 10): string {
@@ -13,6 +14,8 @@ function generateToken(length = 10): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (handleCors(req, res)) return;
+
   if (req.method === 'POST') {
     try {
       const { manual_id, is_permanent, expires_at, password, active, userId } = req.body || {};

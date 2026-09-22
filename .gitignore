@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Production build outputs
+dist/
+dist-ssr/
+
+# Environment variables (SECURITY - Never commit real credentials)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel & IDE files
+.vercel
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# System & Log files
+*.log
+.DS_Store
+Thumbs.db

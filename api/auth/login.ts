@@ -1,13 +1,16 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { query } from '../_lib/db';
 import { hashPassword, createSessionToken } from '../_lib/auth';
+import { handleCors } from '../_lib/cors';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
-  }
-
   try {
+    if (handleCors(req, res)) return;
+
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Método não permitido' });
+    }
+
     const { email, password } = req.body || {};
 
     if (!email || !password) {
@@ -49,6 +52,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       token,
     });
   } catch (err: any) {
-    return res.status(500).json({ error: `Erro no servidor: ${err.message}` });
+    console.error('[API Auth Login Error]:', err);
+    return res.status(500).json({
+      error: `Erro ao realizar login: ${err?.message || 'Falha de conexão com o banco de dados Neon.'}`
+    });
   }
 }

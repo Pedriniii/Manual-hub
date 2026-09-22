@@ -81,8 +81,9 @@ VALUES (
   '00000000-0000-0000-0000-000000000001',
   'Super Administrador',
   'SUP',
-  'c3e60249c5658e3760ec277eb372a8c3d91cf97cf851dcae32d39886edce61ecb7d53b26c7d1e8c79eb0cb1bc978586055c65a77f0a8e0f4a434c3f59e663a8a',
+  '67498549546061e504ee05d4427a0cb8d167d1ee9f3c5589e0367398612452eeb646ab1395f82bbb50eaaa9ec69a528bad0a30dd418dd29915191fcadb3a545c',
   'superadmin',
   true
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET
+  password_hash = EXCLUDED.password_hash;
